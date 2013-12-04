@@ -1,0 +1,128 @@
+<head>
+<link href="hexaflip.css" rel="stylesheet" type="text/css">
+</head>
+
+<div id="grid-pix-test"></div>
+</body>
+
+<script src="hexaflip.js"></script>
+<script>
+/*
+TODO: possibly make arrange occur on double-click
+TODO: move GridPix to standalone library; need to see how to include hexaflip.js
+TODO: checkin to github
+*/
+function GridPix(el, images, cubePx) {
+  cubePx = cubePx != null ? cubePx : 75;
+
+  function onImagesLoaded(imageUris, callback) {
+    /*
+    Calls callback when all images in imageUris have been loaded.
+    */
+
+    var imagesRemaining = imageUris.length;
+    function countDown() {
+      /*
+      Decrement number of images; if number is zero, invoke callback.
+      */
+      console.log(imagesRemaining);
+      imagesRemaining--;
+      if (imagesRemaining == 0) {
+        callback();
+      }
+    }
+
+    // Load images; set countDown function to be called when load is complete.
+    for (var i = 0; i < imageUris.length; i++) {
+      var image = new Image();
+      image.onload = countDown;
+      image.src = imageUris[i];
+    }
+  }
+
+  onImagesLoaded(images, function() {
+  
+    // Get max image dimensions
+    var maxWidth = 0;
+    var maxHeight = 0;
+    for(var i = 0; i < images.length; i++) {
+      image = new Image();
+      image.src = images[i];
+      if (image.height > maxHeight) {
+        maxHeight = image.height;
+      }
+      if (image.width > maxWidth) {
+        maxWidth = image.width;
+      } 
+    }
+    console.log(maxHeight, maxWidth);
+  
+    // Create divs and cubes
+    var hexaFlips = new Array();
+    window.hexaFlips = hexaFlips;
+    for (var y = 0; y < maxHeight; y+= cubePx) {
+      var divY = document.createElement('div');
+      divY.className = 'gridpix-parent';
+      document.body.appendChild(divY);
+      for (var x = 0; x < maxWidth; x+= cubePx) {
+        var divX = document.createElement('div');
+        divX.className = 'gridpix-child';
+        divX.style.margin = 0.5;
+        divY.appendChild(divX);
+        var hf = new HexaFlip(divX, 
+          {set:images}, 
+          {
+            size:cubePx,
+            domEvents: {
+              mouseover: function(e, face, cube) {
+              },
+              mouseout: function(e, face, cube) {
+                this.flip()
+              },
+              click: function(e, face, cube) {
+                  console.log('click');
+                  var targetAngle = this.cubes.set.last; 
+                  for(var i = 0; i < window.hexaFlips.length; i++) {
+                    var hf_i = window.hexaFlips[i];
+                    while(hf_i.cubes.set.last != this.cubes.set.last) {
+                      if (hf_i.cubes.set.last > this.cubes.set.last) {
+                        hf_i.flipBack();
+                      } else {
+                        hf_i.flip();
+                      }
+                    }
+                  }
+              }
+            }
+          }
+        );
+        divX.hexaFlip = hf;
+
+        hexaFlips.push(hf);
+        console.log("x=%d, y=%d", x, y);
+        hf.cubes.set.front.style.backgroundPosition = "-" + x + "px -" + y + "px"
+        hf.cubes.set.back.style.backgroundPosition = "-" + x + "px -" + y + "px"
+        hf.cubes.set.left.style.backgroundPosition = "-" + x + "px -" + y + "px"
+        hf.cubes.set.right.style.backgroundPosition = "-" + x + "px -" + y + "px"
+        hf.cubes.set.top.style.backgroundPosition = "-" + x + "px -" + y + "px"
+        hf.cubes.set.bottom.style.backgroundPosition = "-" + x + "px -" + y + "px"
+        hf.cubes.set.el.style.backgroundPosition = "-" + x + "px -" + y + "px"
+      }
+    }
+  });
+}
+var images = [
+                './images/girl.jpg',
+                './images/jackson.jpg',
+                './images/nicholson.jpg',
+                './images/pie5.jpeg',
+                './images/pie1.jpeg',
+                './images/pie2.jpeg',
+                './images/pie3.jpeg',
+                './images/pie4.jpeg',
+            ];
+var gp = new GridPix(document.getElementById('grid-pix-test'), images, 25);
+
+</script>
+<script>
+</script>
