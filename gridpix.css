@@ -7,23 +7,3 @@
     display:inline-block;
     /*TODO: use display:inline; for IE7 */
 }
-.gridpix-side {
-  width: 1000%;
-  overflow: hidden;
-  height: 100.5%;
-  position: absolute;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-  -webkit-background-size: cover;
-  -moz-background-size: cover;
-  background-size: auto !important;
-  text-align: center;
-  background-color: #333;
-  color: #fff;
-  font-weight: 100;
-  text-shadow: 0 -2px 0 rgba(0,0,0,0.2);
-  line-height: 1.5;
-  background-repeat: no-repeat !important;
-}
