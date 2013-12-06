@@ -78,7 +78,7 @@
 
             // Create a div for that will contain a HexaFlip
             var divX = document.createElement('div');
-            divX.className = 'gridpix-child gridpix-side';
+            divX.className = 'gridpix-child';
             divX.style.margin = 1;
             divY.appendChild(divX);
 
@@ -98,6 +98,24 @@
               positionedImages.push(posImage);
             }
 
+            // Define a seek callback function to use with HexaFlip instances.
+            function flipSeek(e, face, cube) {
+              /*
+              Flips all of the window.hexaFlips to the position of this cube.
+              Desigend to be used as a DOM event callback for a HexaFlip instance.
+              */
+              for(var i = 0; i < window.hexaFlips.length; i++) {
+                var hf_i = window.hexaFlips[i];
+                while(hf_i.cubes.set.last != this.cubes.set.last) {
+                  if (hf_i.cubes.set.last > this.cubes.set.last) {
+                    hf_i.flipBack();
+                  } else {
+                    hf_i.flip();
+                  }
+                }
+              }
+            }
+
             // Create a HexaFlip. See HexaFlip docs for details on argument semantics.
             // In our case, we make the cubes flip on mouseover and "seek" on double-click
             var hf = new HexaFlip(divX, 
@@ -108,20 +126,7 @@
                   mouseover: function(e, face, cube) {
                   },
                   mouseout: mouseOutFlip, 
-                  dblclick: function(e, face, cube) {
-                      var targetAngle = this.cubes.set.last; 
-                      for(var i = 0; i < window.hexaFlips.length; i++) {
-                        var hf_i = window.hexaFlips[i];
-                        // TODO: make the conditional below < or > to avoid edge-case infinite loop 
-                        while(hf_i.cubes.set.last != this.cubes.set.last) {
-                          if (hf_i.cubes.set.last > this.cubes.set.last) {
-                            hf_i.flipBack();
-                          } else {
-                            hf_i.flip();
-                          }
-                        }
-                      }
-                  }
+                  dblclick: flipSeek
                 }
               }
             );
@@ -151,43 +156,16 @@
           positionedImages.push(posImage);
         }
 
-        // 
-        var divY = document.createElement('div');
-        divY.className = 'gridpix-parent';
-        pickerEl.appendChild(divY);
-        var divX = document.createElement('div');
-        divX.className = 'gridpix-child';
-        divX.style.margin = 0.5;
-        divY.appendChild(divX);
+        // Create a "picker" HexaFlip
         var hf = new HexaFlip(pickerEl, 
             {set:positionedImages}, 
             {
               size:cubePx,
               domEvents: {
-                  dblclick: function(e, face, cube) {
-                      var targetAngle = this.cubes.set.last; 
-                      for(var i = 0; i < window.hexaFlips.length; i++) {
-                        var hf_i = window.hexaFlips[i];
-                        while(hf_i.cubes.set.last != this.cubes.set.last) {
-                          if (hf_i.cubes.set.last > this.cubes.set.last) {
-                            hf_i.flipBack();
-                          } else {
-                            hf_i.flip();
-                          }
-                        }
-                      }
-                  }
+                  dblclick: flipSeek
                 }
               }
             );
-            var faces = ['front', 'back', 'left', 'right', 'top', 'bottom', 'el'];
-            for(var i=0; i < faces.length; i++) {
-              hf.cubes.set[faces[i]].style.backgroundSize = "contain"; 
-              hf.cubes.set[faces[i]].style.backgroundRepeat = "no-repeat"; 
-            }
-    
-            divX.hexaFlip = hf;
-    
       });
     }
 
