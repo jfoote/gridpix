@@ -70,7 +70,6 @@
 
           // Create a div that will contain a row of HexaFlips 
           var divY = document.createElement('div');
-          divY.className = 'gridpix-parent gridpix-side';
           divY.style.margin = 1;
           el.appendChild(divY);
 
@@ -130,25 +129,29 @@
     
             hexaFlips.push(hf);
     
-/* TODO: uncomment this upon fail above
-            // Adjust the image on this HexaFlip so that it lines up with the others 
-            // Note that we adjust the image on all faces of the cube; this might be overkill
-            var faces = ['front', 'back', 'left', 'right', 'top', 'bottom', 'el'];
-            var style = null;
-            for(var i=0; i < faces.length; i++) {
-              style = hf.cubes.set[faces[i]].style;
-              style.backgroundPosition = "-" + x + "px -" + y + "px";
-              style.backgroundSize = "auto";
-	      style.backgroundRepeat = "no-repeat";
-            }
-*/
           } // for-x
         } // for-y
 
-        // create picker TODO: make this optional, and position it better (or make that optional too), pass in the picker element!
+        // If the user didn't specify a picker element, we're done
         if (pickerEl == null) {
           return;
         }
+
+       // As above, here we create an array of Objects that will cause the HexaFlip code 
+       // to display our images with the proper style (which is slightly different that what 
+       // was used for the the tiles above).
+        var positionedImages = [];
+        for(var i = 0; i < imageUris.length; i++) {
+          var posImage = new Object();
+          posImage.value = imageUris[i]; // HexaFlip will read this as a URI
+          posImage.style = new Object();
+          posImage.style.backgroundPosition = "center"
+          posImage.style.backgroundSize = "contain"; 
+          posImage.style.backgroundRepeat = "no-repeat"; 
+          positionedImages.push(posImage);
+        }
+
+        // 
         var divY = document.createElement('div');
         divY.className = 'gridpix-parent';
         pickerEl.appendChild(divY);
@@ -156,8 +159,8 @@
         divX.className = 'gridpix-child';
         divX.style.margin = 0.5;
         divY.appendChild(divX);
-        var hf = new HexaFlip(divX, 
-            {set:imageUris}, 
+        var hf = new HexaFlip(pickerEl, 
+            {set:positionedImages}, 
             {
               size:cubePx,
               domEvents: {
