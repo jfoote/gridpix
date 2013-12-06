@@ -5,9 +5,9 @@
     TODO: fix commented-out namespace encapsulation logic
     TODO: checkin to github
     */
-    function GridPix(el, images, cubesPerSide, mouseOutFlip, pickerEl) {
+    function GridPix(el, imageUris, cubesPerSide, mouseOutFlip, pickerEl) {
       /*
-      Creates a GridPix object to display 'images' array of image URIs on element 'el'. 
+      Creates a GridPix object to display 'imageUris' array of image URIs on element 'el'. 
       The grid will have 'cubesPerSide' cubes per side (default is 2).
       If 'mouseOutFlip' is true, cubes will flip on mouseout (default is false).
       If 'pickerEl' is set to a document element, the element will display the entire image and
@@ -40,14 +40,16 @@
         }
       }
     
-      onImagesLoaded(images, function() {
+      onImagesLoaded(imageUris, function() {
       
         // Get max image dimensions
         var maxWidth = 0;
         var maxHeight = 0;
-        for(var i = 0; i < images.length; i++) {
+        var images = [];
+        for(var i = 0; i < imageUris.length; i++) {
           var image = new Image();
-          image.src = images[i];
+          images.push(image);
+          image.src = imageUris[i];
           if (image.height > maxHeight) {
             maxHeight = image.height;
           }
@@ -58,7 +60,6 @@
 
         // Calculate dimensions of HexaFlip cubes
         var cubePx = Math.max(maxHeight, maxWidth) / Math.floor(cubesPerSide);
-        console.log(Math.max(maxHeight, maxWidth),  Math.floor(cubesPerSide));
 
         // Create grid of hexaflips (contained in divs, respectively)
         var hexaFlips = new Array();
@@ -82,17 +83,20 @@
             divX.style.margin = 1;
             divY.appendChild(divX);
 
-            // TODO: Trying - create image objects that have a style that defines image position, etc
+            // Here we create an array of Objects that will cause the HexaFlip code 
+            // to display our images with the proper offsets on each face of the cube (giving
+            // the appearance of a centered image
             var positionedImages = [];
-            for(var i = 0; i < images.length; i++) {
-              var image = new Object();
-              image.value = images[i]; // HexaFlip will read this as a URI
-              image.style = new Object();
-              // TODO: put centering logic here!
-              image.style.backgroundPosition = "-" + x + "px -" + y + "px";
-              image.style.backgroundSize = "auto";
-              image.style.backgroundRepeat = "no-repeat";
-              positionedImages.push(image);
+            for(var i = 0; i < imageUris.length; i++) {
+              var posImage = new Object();
+              posImage.value = imageUris[i]; // HexaFlip will read this as a URI
+              posImage.style = new Object();
+              xPos = -(x - (maxWidth - images[i].width)/2)
+              yPos = -(y - (maxHeight - images[i].height)/2)
+              posImage.style.backgroundPosition = xPos + "px " + yPos + "px";
+              posImage.style.backgroundSize = "auto";
+              posImage.style.backgroundRepeat = "no-repeat";
+              positionedImages.push(posImage);
             }
 
             // Create a HexaFlip. See HexaFlip docs for details on argument semantics.
@@ -153,7 +157,7 @@
         divX.style.margin = 0.5;
         divY.appendChild(divX);
         var hf = new HexaFlip(divX, 
-            {set:images}, 
+            {set:imageUris}, 
             {
               size:cubePx,
               domEvents: {
