@@ -4,6 +4,8 @@
 </head>
 
 <div id="grid-pix-test"></div>
+<p>Hello world</p>
+<div id="grid-pix-picker-test">Picker</div>
 </body>
 
 <script src="hexaflip.js"></script>
@@ -19,7 +21,7 @@ var images = [
                 './images/pie3.jpeg',
                 './images/pie4.jpeg',
             ];
-var gp = new GridPix(document.getElementById('grid-pix-test'), images, 125, true);
+var gp = new GridPix(document.getElementById('grid-pix-test'), images, 2, true, document.getElementById('grid-pix-picker-test'));
 
 </script>
 <script>
