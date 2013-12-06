@@ -43,11 +43,10 @@
       onImagesLoaded(images, function() {
       
         // Get max image dimensions
-        var imageDimensions = {};
         var maxWidth = 0;
         var maxHeight = 0;
         for(var i = 0; i < images.length; i++) {
-          image = new Image();
+          var image = new Image();
           image.src = images[i];
           if (image.height > maxHeight) {
             maxHeight = image.height;
@@ -60,7 +59,7 @@
         // Calculate dimensions of HexaFlip cubes
         var cubePx = Math.max(maxHeight, maxWidth) / Math.floor(cubesPerSide);
         console.log(Math.max(maxHeight, maxWidth),  Math.floor(cubesPerSide));
-      
+
         // Create grid of hexaflips (contained in divs, respectively)
         var hexaFlips = new Array();
         window.hexaFlips = hexaFlips;
@@ -83,10 +82,23 @@
             divX.style.margin = 1;
             divY.appendChild(divX);
 
+            // TODO: Trying - create image objects that have a style that defines image position, etc
+            var positionedImages = [];
+            for(var i = 0; i < images.length; i++) {
+              var image = new Object();
+              image.value = images[i]; // HexaFlip will read this as a URI
+              image.style = new Object();
+              // TODO: put centering logic here!
+              image.style.backgroundPosition = "-" + x + "px -" + y + "px";
+              image.style.backgroundSize = "auto";
+              image.style.backgroundRepeat = "no-repeat";
+              positionedImages.push(image);
+            }
+
             // Create a HexaFlip. See HexaFlip docs for details on argument semantics.
             // In our case, we make the cubes flip on mouseover and "seek" on double-click
             var hf = new HexaFlip(divX, 
-              {set:images}, 
+              {set:positionedImages}, 
               {
                 size:cubePx,
                 domEvents: {
@@ -114,6 +126,7 @@
     
             hexaFlips.push(hf);
     
+/* TODO: uncomment this upon fail above
             // Adjust the image on this HexaFlip so that it lines up with the others 
             // Note that we adjust the image on all faces of the cube; this might be overkill
             var faces = ['front', 'back', 'left', 'right', 'top', 'bottom', 'el'];
@@ -124,6 +137,7 @@
               style.backgroundSize = "auto";
 	      style.backgroundRepeat = "no-repeat";
             }
+*/
           } // for-x
         } // for-y
 
