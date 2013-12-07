@@ -60,13 +60,14 @@ window.GridPix = function GridPix(el, imageUris, cubesPerSide, mouseOutFlip, pic
 
     // Calculate dimensions of HexaFlip cubes
     var cubePx = Math.max(maxHeight, maxWidth) / Math.floor(cubesPerSide);
+    var gridLength = cubePx * cubesPerSide;
 
     // Create grid of hexaflips (contained in divs, respectively)
     var hexaFlips = new Array();
     window.hexaFlips = hexaFlips;
 
     // This iterates over rows (of cubePx height)
-    for (var y = 0; y < maxHeight; y+= cubePx) {
+    for (var y = 0; y < gridLength; y+= cubePx) {
 
       // Create a div that will contain a row of HexaFlips 
       var divY = document.createElement('div');
@@ -74,7 +75,7 @@ window.GridPix = function GridPix(el, imageUris, cubesPerSide, mouseOutFlip, pic
       el.appendChild(divY);
 
       // This iterates over elements within each row (of cubePx width)
-      for (var x = 0; x < maxWidth; x+= cubePx) {
+      for (var x = 0; x < gridLength; x+= cubePx) {
 
         // Create a div for that will contain a HexaFlip
         var divX = document.createElement('div');
@@ -90,8 +91,8 @@ window.GridPix = function GridPix(el, imageUris, cubesPerSide, mouseOutFlip, pic
           var posImage = new Object();
           posImage.value = imageUris[i]; // HexaFlip will read this as a URI
           posImage.style = new Object();
-          xPos = -(x - (maxWidth - images[i].width)/2)
-          yPos = -(y - (maxHeight - images[i].height)/2)
+          xPos = -(x - (gridLength - images[i].width)/2)
+          yPos = -(y - (gridLength - images[i].height)/2)
           posImage.style.backgroundPosition = xPos + "px " + yPos + "px";
           posImage.style.backgroundSize = "auto";
           posImage.style.backgroundRepeat = "no-repeat";
