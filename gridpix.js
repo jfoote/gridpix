@@ -5,7 +5,7 @@ License: MIT License
 */
 
 // TODO: use anonymous-function style namespace for encapsulation
-window.GridPix = function GridPix(el, imageUris, cubesPerSide, mouseOutFlip, pickerEl) {
+window.GridPix = function GridPix(el, imageUris, cubePx, mouseOutFlip, pickerEl, pickerPx) {
   /*
   Creates a GridPix object to display 'imageUris' array of image URIs on element 'el'. 
   The grid will have 'cubesPerSide' cubes per side (default is 2).
@@ -13,15 +13,16 @@ window.GridPix = function GridPix(el, imageUris, cubesPerSide, mouseOutFlip, pic
   If 'pickerEl' is set to a document element, the element will display the entire image and
   flip the grid when double-clicked (default is null/no picker).
   */
-  cubesPerSide = cubesPerSide != null ? cubesPerSide : 2;
-  mouseOutFlip = mouseOutFlip != null ? (function(e){this.flip();}) : (function(e){});
+  cubePx = cubePx != null ? cubePx : 100;
+  mouseOutFlip = mouseOutFlip == true ? (function(e){this.flip();}) : (function(e){});
+  pickerPx = pickerPx != null ? pickerPx : cubePx;
 
-  function onImagesLoaded(imageUris, callback) {
+  function onImagesLoaded(imageUrisToLoad, callback) {
     /*
     Calls callback when all images in imageUris have been loaded.
     */
 
-    var imagesRemaining = imageUris.length;
+    var imagesRemaining = imageUrisToLoad.length;
     function countDown() {
       /*
       Decrement number of images; if number is zero, invoke callback.
@@ -33,10 +34,10 @@ window.GridPix = function GridPix(el, imageUris, cubesPerSide, mouseOutFlip, pic
     }
 
     // Load images; set countDown function to be called when load is complete.
-    for (var i = 0; i < imageUris.length; i++) {
+    for (var i = 0; i < imageUrisToLoad.length; i++) {
       var image = new Image();
       image.onload = countDown;
-      image.src = imageUris[i];
+      image.src = imageUrisToLoad[i];
     }
   }
 
@@ -58,29 +59,26 @@ window.GridPix = function GridPix(el, imageUris, cubesPerSide, mouseOutFlip, pic
       } 
     }
 
-    // Calculate dimensions of HexaFlip cubes
-    var cubePx = Math.max(maxHeight, maxWidth) / Math.floor(cubesPerSide);
-    var gridLength = cubePx * cubesPerSide;
+    // Calculate grid dimensions
+    var gridWidth = Math.ceil(maxWidth/cubePx) * cubePx;
+    var gridHeight = Math.ceil(maxHeight/cubePx) * cubePx;
 
     // Create grid of hexaflips (contained in divs, respectively)
     var hexaFlips = new Array();
-    window.hexaFlips = hexaFlips;
 
     // This iterates over rows (of cubePx height)
-    for (var y = 0; y < gridLength; y+= cubePx) {
+    for (var y = 0; y < maxHeight; y+= cubePx) {
 
       // Create a div that will contain a row of HexaFlips 
       var divY = document.createElement('div');
-      divY.style.margin = 1;
       el.appendChild(divY);
 
       // This iterates over elements within each row (of cubePx width)
-      for (var x = 0; x < gridLength; x+= cubePx) {
+      for (var x = 0; x < maxWidth; x+= cubePx) {
 
         // Create a div for that will contain a HexaFlip
         var divX = document.createElement('div');
         divX.className = 'gridpix-child';
-        divX.style.margin = 1;
         divY.appendChild(divX);
 
         // Here we create an array of Objects that will cause the HexaFlip code 
@@ -91,8 +89,8 @@ window.GridPix = function GridPix(el, imageUris, cubesPerSide, mouseOutFlip, pic
           var posImage = new Object();
           posImage.value = imageUris[i]; // HexaFlip will read this as a URI
           posImage.style = new Object();
-          xPos = -(x - (gridLength - images[i].width)/2)
-          yPos = -(y - (gridLength - images[i].height)/2)
+          xPos = -(x - (gridWidth - images[i].width)/2)
+          yPos = -(y - (gridHeight - images[i].height)/2)
           posImage.style.backgroundPosition = xPos + "px " + yPos + "px";
           posImage.style.backgroundSize = "auto";
           posImage.style.backgroundRepeat = "no-repeat";
@@ -102,11 +100,11 @@ window.GridPix = function GridPix(el, imageUris, cubesPerSide, mouseOutFlip, pic
         // Define a seek callback function to use with HexaFlip instances.
         function flipSeek(e, face, cube) {
           /*
-          Flips all of the window.hexaFlips to the position of this cube.
-          Desigend to be used as a DOM event callback for a HexaFlip instance.
+          Flips all of this.hexaFlips to the position of this cube.
+          Designed to be used as a DOM event callback for a HexaFlip instance.
           */
-          for(var i = 0; i < window.hexaFlips.length; i++) {
-            var hf_i = window.hexaFlips[i];
+          for(var i = 0; i < this.hexaFlips.length; i++) {
+            var hf_i = this.hexaFlips[i];
             while(hf_i.cubes.set.last != this.cubes.set.last) {
               if (hf_i.cubes.set.last > this.cubes.set.last) {
                 hf_i.flipBack();
@@ -138,6 +136,12 @@ window.GridPix = function GridPix(el, imageUris, cubesPerSide, mouseOutFlip, pic
       } // for-x
     } // for-y
 
+    // Attach a reference to the HexaFlip set to each HexaFlip 
+    // so that each HexaFlip can flip the whole set
+    for (var i = 0; i < hexaFlips.length; i++) {
+      hexaFlips[i].hexaFlips = hexaFlips;
+    }
+
     // If the user didn't specify a picker element, we're done
     if (pickerEl == null) {
       return;
@@ -161,12 +165,13 @@ window.GridPix = function GridPix(el, imageUris, cubesPerSide, mouseOutFlip, pic
     var hf = new HexaFlip(pickerEl, 
         {set:positionedImages}, 
         {
-          size:cubePx,
+          size:pickerPx,
           domEvents: {
               dblclick: flipSeek
-            }
           }
-        );
+        }
+    );
+    hf.hexaFlips = hexaFlips;
   });
 }
 
