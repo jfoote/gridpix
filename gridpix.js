@@ -8,10 +8,12 @@ License: MIT License
 window.GridPix = function GridPix(el, imageUris, cubePx, mouseOutFlip, pickerEl, pickerPx) {
   /*
   Creates a GridPix object to display 'imageUris' array of image URIs on element 'el'. 
-  The grid will have 'cubesPerSide' cubes per side (default is 2).
+  The cubes that make up the grid will have sides of length 'cubePx' (default is 100).
   If 'mouseOutFlip' is true, cubes will flip on mouseout (default is false).
   If 'pickerEl' is set to a document element, the element will display the entire image and
   flip the grid when double-clicked (default is null/no picker).
+  If 'pickerEl' is defined, the picker will be a cube with a side length of 'pickerPx' 
+  (default is 'cubePx').
   */
   cubePx = cubePx != null ? cubePx : 100;
   mouseOutFlip = mouseOutFlip == true ? (function(e){this.flip();}) : (function(e){});
@@ -71,6 +73,7 @@ window.GridPix = function GridPix(el, imageUris, cubePx, mouseOutFlip, pickerEl,
 
       // Create a div that will contain a row of HexaFlips 
       var divY = document.createElement('div');
+      divY.style.margin = "0px";
       el.appendChild(divY);
 
       // This iterates over elements within each row (of cubePx width)
@@ -78,7 +81,8 @@ window.GridPix = function GridPix(el, imageUris, cubePx, mouseOutFlip, pickerEl,
 
         // Create a div for that will contain a HexaFlip
         var divX = document.createElement('div');
-        divX.className = 'gridpix-child';
+        divX.style.margin = "0px";
+        divX.style.display = "inline-block";
         divY.appendChild(divX);
 
         // Here we create an array of Objects that will cause the HexaFlip code 
